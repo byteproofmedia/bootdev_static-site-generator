@@ -1,5 +1,5 @@
 class HTMLNode:
-    def __init__(self, tag: str | None = None, value: str | None = None, children: list["HTMLNode"] | None = None, props: dict[str, str] | None = None) -> None:
+    def __init__(self, tag: str | None = None, value: str | None = None, children: list[HTMLNode] | None = None, props: dict[str, str] | None = None) -> None:
         self.tag = tag
         self.value = value
         self.children = children
@@ -32,3 +32,18 @@ class LeafNode(HTMLNode):
 
     def __repr__(self) -> str:
         return f"LeafNode({self.tag}, {self.value}, {self.props})"
+
+class ParentNode(HTMLNode):
+    def __init__(self, tag: str, children: list[HTMLNode], props: dict[str, str] | None = None) -> None:
+        super().__init__(tag, None, children, props)
+
+    def to_html(self):
+        if self.tag is None or self.tag == "":
+            raise ValueError("Error: tag is required")
+        if self.children is None or len(self.children) == 0:
+            raise ValueError("Error: children node(s) are required")
+        child_nodes = []
+        for child in self.children:
+            child_nodes.append(child.to_html())
+        child_nodes = ''.join(child_nodes)
+        return f"<{self.tag}{self.props_to_html()}>{child_nodes}</{self.tag}>"

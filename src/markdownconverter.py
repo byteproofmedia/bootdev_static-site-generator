@@ -2,6 +2,16 @@ import re
 
 from textnode import TextNode, TextType
 
+def markdown_to_blocks(markdown):
+    markdown_blocks = markdown.split("\n\n")
+    markdown_output = []
+    for line in markdown_blocks:
+        clean_line = line.strip()
+        if clean_line != '':
+            markdown_output.append(clean_line)
+    return markdown_output
+
+
 def text_to_textnodes(text) -> list[TextNode]:
     nodes: list[TextNode] = [TextNode(text, TextType.TEXT)]
     #bold nodes
@@ -38,7 +48,6 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
     return new_nodes
 
 def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
-    print(f"Running split_nodes_image:\n{old_nodes}")
     new_nodes: list[TextNode] = []
     for node in old_nodes:
         original_text = node.text
@@ -51,25 +60,20 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
                 #split original string by this image node
                 sections = remaining_text.split(f"![{image_alt}]({image_link})", 1)
                 if len(sections) >= 1 and sections[0] != '':
-                    print(f"Adding to new_nodes: {TextNode(sections[0], TextType.TEXT)}")
                     new_nodes.append(TextNode(sections[0], TextType.TEXT))
                 if len(sections) >=2:
                     remaining_text = sections[1]
                 else:
                     remaining_text = ''
-                print(f"Adding to new_nodes: {TextNode(image_alt, TextType.IMAGE, image_link)}")
                 new_nodes.append(TextNode(image_alt, TextType.IMAGE, image_link))
-                print(f"Remaining text: {remaining_text}")
                 continue
             if remaining_text != '':
-                print(f"Adding to new_nodes: {TextNode(remaining_text, TextType.TEXT)}")
                 new_nodes.append(TextNode(remaining_text, TextType.TEXT))
             continue
         new_nodes.append(node)
     return new_nodes
 
 def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
-    print(f"Running split_nodes_link:\n{old_nodes}")
     new_nodes: list[TextNode] = []
     for node in old_nodes:
         original_text = node.text
@@ -82,17 +86,14 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
                 #split original string by this image node
                 sections = remaining_text.split(f"[{link_text}]({link_link})", 1)
                 if len(sections) >= 1 and sections[0] != '':
-                    print(f"Adding to new_nodes: {TextNode(sections[0], TextType.TEXT)}")
                     new_nodes.append(TextNode(sections[0], TextType.TEXT))
                 if len(sections) >= 2:
                     remaining_text = sections[1]
                 else:
                     remaining_text = ''
-                print(f"Adding to new_nodes: {TextNode(link_text, TextType.LINK, link_link)}")
                 new_nodes.append(TextNode(link_text, TextType.LINK, link_link))
                 continue
             if remaining_text != '':
-                print(f"Adding to new_nodes: {TextNode(remaining_text, TextType.TEXT)}")
                 new_nodes.append(TextNode(remaining_text, TextType.TEXT))
             continue
         new_nodes.append(node)
